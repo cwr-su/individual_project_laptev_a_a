@@ -38,7 +38,7 @@ class CreateTable(BaseCreateTable):
             telegram_username VARCHAR(255) UNIQUE NOT NULL,
             firstname VARCHAR (255) NOT NULL,
             lastname VARCHAR (255) NOT NULL,
-            count_of_ai_queries INT NOT NULL DEFAULT 1
+            count_of_ai_queries INT NOT NULL
             );
             """
         self._cursor.execute(query)

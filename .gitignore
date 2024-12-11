@@ -6,6 +6,11 @@
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 .idea/
 bot_ai/__pycache__
+
+bot_ai/gigachat/__pycache__/
+bot_ai/utils/__pycache__/
+bot_ai/utils/__pycache__/create_table.cpython-312.pyc
+
 # CMake
 cmake-build-*/
 
