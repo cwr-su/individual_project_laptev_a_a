@@ -153,7 +153,7 @@ class GigaChatPro(BaseAIText):
         }
 
         body: str = json.dumps({
-            "model": "GigaChat",
+            "model": "GigaChat-Max",
             "messages": messages,
             "temperature": temperature_giga,
             "top_p": top_p_giga

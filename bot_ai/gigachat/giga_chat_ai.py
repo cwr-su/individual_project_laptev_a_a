@@ -205,11 +205,21 @@ class ChatDialogGigaVersionPro(BaseChatDialog):
 
             response: str = await VersionAIPro.request(messages, message.from_user.id)
 
-            await self.bot.send_message(
-                text=response,
-                chat_id=message.from_user.id,
-                parse_mode="Markdown",
-            )
+            try:
+                await self.bot.send_message(
+                    text=response,
+                    chat_id=message.from_user.id,
+                    parse_mode="Markdown",
+                )
+            except Exception as ex:
+                logging.error(
+                    f"Error in send message: {ex}"
+                )
+                await self.bot.send_message(
+                    text=response,
+                    chat_id=message.from_user.id,
+                    parse_mode=None,
+                )
 
             await UpdateMessages.update_messages("assistant", response, message.from_user.id)
 

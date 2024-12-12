@@ -121,13 +121,15 @@ class ViewAnalytics(BasicMethod):
                 "Back to main menu 🌐": "back_on_main"
             }
         )
+        result: str = await HandlerDB.get_analytic_datas_count_ai_queries(
+            callback_query.from_user.id
+        )
         await bot.edit_message_text(
             text=f"💻 <b>Analytics</b>\n"
                  f"<b>*-*-*-*-*-*-*-*-*-*-*</b>\n\n"
                  f"👑 <b>{callback_query.from_user.first_name}</b>, you used "
-                 f"{await HandlerDB.get_analytic_datas_count_ai_queries(
-                     callback_query.from_user.id
-                 )} requests.\n\nTo back to main menu - click on the corresponding button below.",
+                 f"{result} requests.\n\nTo back to main menu - click on the corresponding button "
+                 f"below.",
             chat_id=callback_query.from_user.id,
             reply_markup=button.as_markup(),
             parse_mode="HTML",
