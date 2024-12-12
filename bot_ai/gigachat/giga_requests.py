@@ -143,7 +143,6 @@ class GigaChatPro(BaseAIText):
 
         :return: Result.
         """
-        print(messages)
         url: str = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
 
         headers: dict = {
@@ -154,7 +153,7 @@ class GigaChatPro(BaseAIText):
         }
 
         body: str = json.dumps({
-            "model": "GigaChat-Max",
+            "model": "GigaChat",
             "messages": messages,
             "temperature": temperature_giga,
             "top_p": top_p_giga
@@ -209,15 +208,15 @@ class GigaImagePro(BaseAIImage):
         """
         url: str = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
         payload: str = json.dumps({
-            "model": "GigaChat-Pro",
+            "model": "GigaChat-Max",
             "messages": [
                 {
                     "role": "system",
-                    "content": "Ты — Василий Кандинский"
+                    "content": "You're Wassily Kandinsky"
                 },
                 {
                     "role": "user",
-                    "content": request
+                    "content": request + ", please, generate in HD (the best) quality."
                 },
             ],
             "function_call": "auto",

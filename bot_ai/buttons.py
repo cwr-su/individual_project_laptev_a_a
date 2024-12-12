@@ -1,6 +1,7 @@
 """Module for getting buttons."""
-from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 import abc
+
+from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 
 
 class BaseButtonsCallData(abc.ABC):

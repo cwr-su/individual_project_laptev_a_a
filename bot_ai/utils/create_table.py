@@ -38,6 +38,7 @@ class CreateTable(BaseCreateTable):
             telegram_username VARCHAR(255) UNIQUE NOT NULL,
             firstname VARCHAR (255) NOT NULL,
             lastname VARCHAR (255) NOT NULL,
+            context LONGTEXT,
             count_of_ai_queries INT NOT NULL
             );
             """

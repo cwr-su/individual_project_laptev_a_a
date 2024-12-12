@@ -1,21 +1,23 @@
-"""Main module of the bot."""
+"""Main-module of the bot."""
+import json
+import abc
+import logging
+import pymysql
+
 from aiogram import Bot, Dispatcher, F
 from aiogram.fsm.context import FSMContext
 from aiogram import Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import ContentType
 from aiogram.filters import Command
-
-import json
-import abc
-import logging
-import pymysql
 
 from bot_ai.buttons import Buttons
 from bot_ai.utils.create_table import CreateTable
 from bot_ai.utils.mysql_connection import Connection
 from bot_ai.gigachat.giga_chat_ai import router_chat_ai, GigaChatAI
 from bot_ai.utils.handler_db import HandlerDB
+from bot_ai.gigachat.giga_image_ai import router_ai_img, GigaCreator
 
 
 class BasicMethod(abc.ABC):
@@ -51,22 +53,24 @@ class StartCommand(BasicMethod):
         """
         button: InlineKeyboardBuilder = await Buttons.create(
             data={
-                "Start Chat Dialog with AI": "start_chat_dialog_ai",
-                "View analytics": "view_analytics"
+                "✅ Start Chat with AI": "start_chat_dialog_ai",
+                "View analytics 📈": "view_analytics",
+                "🖼 Image generate": "start_image_generate"
             }
         )
         await bot.send_message(
-            text=f"Hello 👀!\n"
-                 f"*{message.from_user.first_name}*, to start either AI model 🧠 - click on the "
-                 f"corresponding button below.",
+            text=f"✌ <b>Hello</b>,\n"
+                 f"<b>{message.from_user.first_name}</b>, to start the AI-MAX model 🧠 - "
+                 f"click on the corresponding button below.",
             chat_id=message.from_user.id,
             reply_markup=button.as_markup(),
-            parse_mode="Markdown"
+            parse_mode="HTML"
         )
 
 
 class BackOnMain(BasicMethod):
     """Class for the move to the main-menu."""
+
     @staticmethod
     async def method(bot: Bot, callback_query: Message | CallbackQuery) -> None:
         """
@@ -80,23 +84,27 @@ class BackOnMain(BasicMethod):
         """
         button: InlineKeyboardBuilder = await Buttons.create(
             data={
-                "Start Chat Dialog with AI": "start_chat_dialog_ai",
-                "View analytics": "view_analytics"
+                "✅ Start Chat with AI": "start_chat_dialog_ai",
+                "View analytics 📈": "view_analytics",
+                "🖼 Image generate": "start_image_generate"
             }
         )
         await bot.edit_message_text(
-            text=f"🌐 Main-menu\n"
-                 f"*{callback_query.from_user.first_name}*, to start either AI model 🧠 - click "
+            text=f"   <b>🌐 Main-menu</b>\n"
+                 f"<b>*-*-*-*-*-*-*-*-*-*-*</b>\n\n"
+                 f"👑 <b>{callback_query.from_user.first_name}</b>, to start either AI "
+                 f"model 🧠 - click "
                  f"on the corresponding button below.",
             chat_id=callback_query.from_user.id,
             reply_markup=button.as_markup(),
-            parse_mode="Markdown",
+            parse_mode="HTML",
             message_id=callback_query.message.message_id
         )
 
 
 class ViewAnalytics(BasicMethod):
     """Class for the move to the analytics menu."""
+
     @staticmethod
     async def method(bot: Bot, callback_query: Message | CallbackQuery) -> None:
         """
@@ -114,18 +122,49 @@ class ViewAnalytics(BasicMethod):
             }
         )
         await bot.edit_message_text(
-            text=f"💻 Analytics\n"
-                 f"*{callback_query.from_user.first_name}*, you used "
+            text=f"💻 <b>Analytics</b>\n"
+                 f"<b>*-*-*-*-*-*-*-*-*-*-*</b>\n\n"
+                 f"👑 <b>{callback_query.from_user.first_name}</b>, you used "
                  f"{await HandlerDB.get_analytic_datas_count_ai_queries(
                      callback_query.from_user.id
-                 )} "
-                 f"requests.\n\n"
-                 f"To back to main menu - click on the "
-                 f"corresponding button below.",
+                 )} requests.\n\nTo back to main menu - click on the corresponding button below.",
             chat_id=callback_query.from_user.id,
             reply_markup=button.as_markup(),
-            parse_mode="Markdown",
+            parse_mode="HTML",
             message_id=callback_query.message.message_id
+        )
+
+
+class DefaultMessage(BasicMethod):
+    """The class for the default message."""
+
+    @staticmethod
+    async def method(bot: Bot, message: Message | CallbackQuery) -> None:
+        """
+        The method for answer to the default message cmd (command).
+
+        :param bot: The Bot Object.
+        :param message: The Callback Query object.
+        :type message: Message | CallbackQuery.
+
+        :return: None.
+        """
+        button: InlineKeyboardBuilder = await Buttons.create(
+            data={
+                "✅ Start Chat with AI": "start_chat_dialog_ai",
+                "View analytics 📈": "view_analytics",
+                "🖼 Image generate": "start_image_generate"
+            }
+        )
+        await bot.send_message(
+            text=f"   <b>🌐 Main-menu</b>\n"
+                 f"<b>*-*-*-*-*-*-*-*-*-*-*</b>\n\n"
+                 f"👑 <b>{message.from_user.first_name}</b>, to start either AI "
+                 f"model 🧠 - click "
+                 f"on the corresponding button below.",
+            chat_id=message.from_user.id,
+            reply_markup=button.as_markup(),
+            parse_mode="HTML"
         )
 
 
@@ -164,12 +203,29 @@ class BotAI(Bot):
 
         :param callback_query: Callback Query.
         :param state: State.
+
         :return: None.
         """
         giga_chat_ai: GigaChatAI = GigaChatAI(
             self
         )
         await giga_chat_ai.giga_chat_ai(callback_query, state)
+
+    async def __start_image_generate(
+            self,
+            callback_query: CallbackQuery,
+            state: FSMContext
+    ) -> None:
+        """
+        The method for the image generation.
+
+        :param callback_query: Callback Query.
+        :param state: State.
+
+        :return: None.
+        """
+        giga_creator: GigaCreator = GigaCreator(self)
+        await giga_creator.get_query(callback_query, state)
 
     async def __back_on_main(
             self,
@@ -188,11 +244,20 @@ class BotAI(Bot):
             callback_query: CallbackQuery,
     ) -> None:
         """
-        This method is used to move to the analytics menu.
+        This method for the moving to the analytics menu.
         :param callback_query: Callback Query.
         :return: None.
         """
         await ViewAnalytics.method(self, callback_query)
+
+    async def __default_message(self, message: Message) -> None:
+        """
+        The function for the default message.
+
+        :param message: Message.
+        :return: None.
+        """
+        await DefaultMessage.method(self, message)
 
     async def run(self) -> None:
         """
@@ -214,6 +279,7 @@ class BotAI(Bot):
             f"The table has been created successfully! "
             f"Starting registering methods and commands..."
         )
+
         self.__router.message.register(
             self.__start_command,
             Command(commands=["start", "main"])
@@ -222,6 +288,16 @@ class BotAI(Bot):
         self.__router.callback_query.register(
             self.__start_chat_dialog_ai,
             F.data == "start_chat_dialog_ai"
+        )
+
+        self.__router.message.register(
+            self.__default_message,
+            F.content_type == ContentType.TEXT
+        )
+
+        self.__router.callback_query.register(
+            self.__start_image_generate,
+            F.data == "start_image_generate"
         )
         self.__router.callback_query.register(
             self.__back_on_main,
@@ -233,7 +309,9 @@ class BotAI(Bot):
         )
 
         self.__dispatcher.include_routers(
-            self.__router, router_chat_ai
+            router_chat_ai,
+            router_ai_img,
+            self.__router
         )
 
         logging.info(
